@@ -1,0 +1,19 @@
+# Rust / Soroban
+/target
+**/*.rs.bk
+Cargo.lock.bak
+
+# Node / frontend
+frontend/node_modules
+frontend/dist
+frontend/.env
+frontend/*.local
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Stellar CLI local identities (never commit secret keys)
+.soroban/
