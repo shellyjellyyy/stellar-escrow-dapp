@@ -5,6 +5,16 @@ members = [
     "contracts/reputation",
 ]
 
+# soroban-env-common 20.3.0 hard-pins ethnum = "=1.5.0". That version has a
+# real upstream bug (unsafe transmute() assumes std's TryFromIntError is
+# zero-sized; recent Rust stable changed its size, see
+# https://github.com/rust-lang/rust/issues/157363), which fails to compile
+# on current stable toolchains. Force the whole build to use the patched
+# 1.5.3 release instead, since soroban-env-common's actual usage of ethnum
+# is unaffected by the patch.
+[patch.crates-io]
+ethnum = { path = "vendor/ethnum-1.5.0-patched" }
+
 [profile.release]
 opt-level = "z"
 overflow-checks = true

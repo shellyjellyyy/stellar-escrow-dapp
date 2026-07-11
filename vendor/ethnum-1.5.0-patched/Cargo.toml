@@ -1,0 +1,27 @@
+[package]
+name = "ethnum"
+version = "1.5.0"
+# PATCHED — see vendor/README.md at the repo root. This is upstream
+# ethnum 1.5.0's source with a single, minimal fix applied to
+# src/error.rs (the tfie() function only) to work around a real
+# upstream Rust regression. Nothing else was changed.
+authors = ["Nicholas Rodrigues Lordello <nlordell@gmail.com>"]
+edition = "2021"
+description = "256-bit integer implementation"
+documentation = "https://docs.rs/ethnum"
+readme = "README.md"
+homepage = "https://github.com/nlordell/ethnum-rs"
+repository = "https://github.com/nlordell/ethnum-rs"
+license = "MIT OR Apache-2.0"
+keywords = ["integer", "u256", "ethereum"]
+categories = ["cryptography::cryptocurrencies", "mathematics", "no-std"]
+
+[package.metadata.docs.rs]
+features = ["serde"]
+
+[features]
+llvm-intrinsics = [] # intrinsics crate not vendored (not published as part of this crate); unused by soroban, kept as a no-op for API compatibility
+macros = [] # deprecated
+
+[dependencies]
+serde = { version = "1", default-features = false, optional = true }
