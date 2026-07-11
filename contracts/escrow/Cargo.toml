@@ -9,11 +9,9 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 soroban-sdk = "20.5.0"
-reputation-contract = { path = "../reputation" }
 
 [dev-dependencies]
 soroban-sdk = { version = "20.5.0", features = ["testutils"] }
-reputation-contract = { path = "../reputation", features = ["testutils"] }
 
 [features]
 testutils = ["soroban-sdk/testutils"]

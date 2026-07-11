@@ -10,8 +10,33 @@
 //! can trigger a timeout refund back to the buyer (and the seller's
 //! reputation takes a hit for non-delivery).
 
-use reputation_contract::ReputationContractClient;
 use soroban_sdk::{contract, contracterror, contractimpl, contracttype, symbol_short, token, Address, Env};
+
+// Bound from the *compiled* reputation-contract.wasm, not the reputation
+// crate's source. This is the pattern soroban-sdk expects for cross-contract
+// calls between separately-deployed contracts: `contractimport!` reads the
+// contract's spec straight out of the wasm binary and generates a `Client`
+// (and a `WASM` byte constant used in tests) from it, without pulling the
+// reputation crate's actual implementation code into this crate's build.
+//
+// Linking the reputation crate in directly (as a normal Cargo path
+// dependency) was tried first and fails at the wasm32 link step: both
+// contracts have a method named `initialize`, and soroban-sdk's
+// `#[contractimpl]` macro exports every method under its bare function name
+// (see soroban-sdk-macros derive_fn.rs) with no per-contract namespacing.
+// Two `#[contract]` structs in one final wasm module means two functions
+// both claiming `export_name = "initialize"` — a duplicate symbol at link
+// time. contractimport! avoids this because no reputation Rust code is
+// compiled into escrow-contract at all.
+//
+// Build order therefore matters: reputation-contract must be built to wasm
+// BEFORE escrow-contract, since this macro reads the file below at escrow's
+// own compile time. `scripts/build.sh` and the CI workflow do this in order.
+mod reputation_contract {
+    soroban_sdk::contractimport!(
+        file = "../../target/wasm32-unknown-unknown/release/reputation_contract.wasm"
+    );
+}
 
 #[derive(Clone)]
 #[contracttype]
@@ -226,7 +251,7 @@ impl EscrowContract {
             .instance()
             .get(&DataKey::ReputationContract)
             .expect("escrow not initialized");
-        let client = ReputationContractClient::new(env, &reputation_id);
+        let client = reputation_contract::Client::new(env, &reputation_id);
         client.record_outcome(&env.current_contract_address(), subject, &positive);
     }
 }

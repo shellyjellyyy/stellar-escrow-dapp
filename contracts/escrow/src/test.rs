@@ -1,7 +1,6 @@
 #![cfg(test)]
 
 use super::*;
-use reputation_contract::{ReputationContract, ReputationContractClient};
 use soroban_sdk::testutils::{Address as _, Ledger};
 use soroban_sdk::Env;
 
@@ -19,7 +18,7 @@ fn create_token_contract<'a>(
 struct TestSetup {
     env: Env,
     escrow: EscrowContractClient<'static>,
-    reputation: ReputationContractClient<'static>,
+    reputation: reputation_contract::Client<'static>,
     token: token::Client<'static>,
     token_admin: token::StellarAssetClient<'static>,
     buyer: Address,
@@ -33,8 +32,8 @@ fn setup() -> TestSetup {
     let token_admin_addr = Address::generate(&env);
     let (token, token_admin) = create_token_contract(&env, &token_admin_addr);
 
-    let reputation_id = env.register_contract(None, ReputationContract);
-    let reputation = ReputationContractClient::new(&env, &reputation_id);
+    let reputation_id = env.register_contract_wasm(None, reputation_contract::WASM);
+    let reputation = reputation_contract::Client::new(&env, &reputation_id);
 
     let escrow_id = env.register_contract(None, EscrowContract);
     let escrow = EscrowContractClient::new(&env, &escrow_id);

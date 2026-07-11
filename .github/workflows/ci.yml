@@ -30,13 +30,17 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
+      - name: Build reputation-contract to WASM
+        run: cargo build --target wasm32-unknown-unknown --release -p reputation-contract
+        # escrow-contract's contractimport! reads this wasm file directly at
+        # its own compile time (even for `cargo test`, not just wasm builds),
+        # so it has to exist before anything touches escrow-contract below.
+
       - name: Run contract unit tests
         run: cargo test --workspace --verbose
 
-      - name: Build contracts to WASM (release)
-        run: |
-          cargo build --target wasm32-unknown-unknown --release -p reputation-contract
-          cargo build --target wasm32-unknown-unknown --release -p escrow-contract
+      - name: Build escrow-contract to WASM (release)
+        run: cargo build --target wasm32-unknown-unknown --release -p escrow-contract
 
       - name: Upload compiled WASM artifacts
         uses: actions/upload-artifact@v4

@@ -89,7 +89,15 @@ If you clone this before deploying your own contracts, the frontend still works 
 - Node.js 20+
 - [Freighter wallet](https://www.freighter.app/) browser extension, funded with testnet XLM via [Friendbot](https://friendbot.stellar.org/)
 
-### 1. Run the contract tests
+### 1. Build the contracts
+
+```bash
+./scripts/build.sh
+```
+
+Compiles both contracts to `target/wasm32-unknown-unknown/release/*.wasm`. This has to happen **before** running tests, not after — see the note below.
+
+### 2. Run the contract tests
 
 ```bash
 cargo test --workspace
@@ -97,13 +105,7 @@ cargo test --workspace
 
 This runs 15 tests across both contracts — deposits, releases, voluntary refunds, timeout refunds, reputation updates, and the authorization checks that keep the Reputation contract from being written to by anyone but Escrow.
 
-### 2. Build the contracts
-
-```bash
-./scripts/build.sh
-```
-
-Compiles both contracts to `target/wasm32-unknown-unknown/release/*.wasm`.
+> **Why build before test?** Escrow calls Reputation across contracts, and rather than linking Reputation's Rust source directly into Escrow (which actually breaks the wasm build — two contracts sharing a method name like `initialize` collide as duplicate wasm exports), Escrow uses `soroban_sdk::contractimport!` to generate a client from Reputation's **compiled `.wasm` file**. That macro reads the file at Escrow's own compile time, so the file has to exist first. `./scripts/build.sh` and the CI workflow both build Reputation before touching Escrow for exactly this reason.
 
 ### 3. Deploy to testnet
 
