@@ -1,0 +1,18 @@
+[toolchain]
+# Soroban's current wasm VM does not yet support the wasm reference-types /
+# multivalue encoding that LLVM's wasm32 backend started emitting by
+# default from Rust 1.81 onward (a Rust codegen regression, tracked at
+# https://github.com/rust-lang/rust/issues/128475). Contracts built with
+# Rust 1.81+ deploy fine locally and pass `cargo test`, but fail at actual
+# on-chain deployment with:
+#   HostError: Error(WasmVm, InvalidAction)
+#   "reference-types not enabled: zero byte expected"
+# Confirmed by a soroban-sdk maintainer as a currently-unsupported Rust
+# range: https://github.com/stellar/rs-soroban-sdk/issues/1438
+#
+# Pinning here makes any rustup-managed `cargo`/`rustc` invocation inside
+# this repo (local dev, and CI via actions that respect rustup) use a known
+# -good version automatically. Bump this once Soroban's VM supports newer
+# wasm proposals.
+channel = "1.80.1"
+targets = ["wasm32-unknown-unknown"]

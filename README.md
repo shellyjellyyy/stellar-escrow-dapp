@@ -84,10 +84,13 @@ If you clone this before deploying your own contracts, the frontend still works 
 
 ### Prerequisites
 
-- Rust (stable) + the `wasm32-unknown-unknown` target: `rustup target add wasm32-unknown-unknown`
+- Rust, installed via [rustup](https://rustup.rs) — **not** a distro package like `apt install rustc`. This repo has a `rust-toolchain.toml` pinning an exact version (see below); rustup reads that automatically, a plain `rustc`/`cargo` from your OS package manager won't.
+- The `wasm32-unknown-unknown` target: `rustup target add wasm32-unknown-unknown` (also picked up automatically from `rust-toolchain.toml` if you don't already have it)
 - [Stellar CLI](https://developers.stellar.org/docs/tools/developer-tools/cli): `cargo install --locked stellar-cli`
 - Node.js 20+
 - [Freighter wallet](https://www.freighter.app/) browser extension, funded with testnet XLM via [Friendbot](https://friendbot.stellar.org/)
+
+> **Why is the Rust version pinned to 1.80.1?** Rust 1.81+ changed how the wasm32 backend encodes some instructions by default (it started emitting the `reference-types`/`multivalue` wasm proposal encoding even for code that doesn't use either), which Soroban's current VM doesn't support yet. Contracts built with a newer Rust compile fine and pass `cargo test` locally and in CI, but fail at actual on-chain deployment with `HostError: Error(WasmVm, InvalidAction)` / `"reference-types not enabled"`. This is a known, currently-unresolved Rust/Soroban compatibility gap (confirmed by a soroban-sdk maintainer: [stellar/rs-soroban-sdk#1438](https://github.com/stellar/rs-soroban-sdk/issues/1438)), not a bug in this repo — `rust-toolchain.toml` pins around it.
 
 ### 1. Build the contracts
 

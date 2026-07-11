@@ -17,8 +17,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
         with:
+          # Soroban's wasm VM doesn't yet support the reference-types wasm
+          # encoding that Rust 1.81+ emits by default for wasm32 targets.
+          # See rust-toolchain.toml at the repo root for the full story.
+          toolchain: "1.80.1"
           targets: wasm32-unknown-unknown
 
       - name: Cache cargo registry
