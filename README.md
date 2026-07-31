@@ -140,26 +140,38 @@ npm test
 
 ## Deployed contracts (testnet)
 
-> Fill these in after running `./scripts/deploy.sh`.
-
 | Contract | Address |
 |---|---|
-| Escrow | `PASTE_ESCROW_CONTRACT_ID_HERE` |
-| Reputation | `PASTE_REPUTATION_CONTRACT_ID_HERE` |
+| Escrow | `CBEG2QRKAJAK4NX34MFIU2FGVFBIZCYHW46B6YRVWYLAHGAUGPCF3HYL` |
+| Reputation | `CC5H44FBF4LIUQJXAJ6V2CHIQVLJWMQE7X26LZLCOKLU7SVA4CIFTLLL` |
 
-**Example transaction (deal created & released):** `PASTE_TRANSACTION_HASH_HERE`
-[View on Stellar Expert](https://stellar.expert/explorer/testnet)
+**Example transaction (deal created):** `333d737e8dd71ebe183d32faf2ddcde182534738b97e558fc2e7a1d7c7ea5301`
+[View transaction on Stellar Expert](https://stellar.expert/explorer/testnet/tx/333d737e8dd71ebe183d32faf2ddcde182534738b97e558fc2e7a1d7c7ea5301)
 
 ## Live demo
 
-- **App:** `PASTE_VERCEL_OR_NETLIFY_LINK_HERE`
-- **Demo video (1–2 min):** `PASTE_VIDEO_LINK_HERE`
+- **App:** [Live deployment](https://stellar-escrow-dapp-delta.vercel.app/)
+- **Demo video (1–2 min):** [Watch demo](https://app.screencastify.com/watch/UHPNesm7qohgHZAF1U3K)
 
 ## Screenshots
 
-> Add screenshots here: desktop view, mobile responsive view, CI pipeline passing, and test output showing the 15 passing tests.
+### Desktop — live on Stellar Testnet
 
----
+![Desktop view](docs/screenshots/desktop.png)
+
+### Mobile responsive view
+
+![Mobile responsive view](docs/screenshots/mobile.png)
+
+### CI pipeline passing
+
+![GitHub Actions CI passing](docs/screenshots/ci-cd-passing.png)
+
+### Contract test suite — 15/15 passing
+
+The escrow contract has 9 passing tests and the reputation contract has 6 passing tests, covering deal creation, fund transfers, releases, refunds, timeout penalties, reputation updates, and authorization.
+
+![15 contract tests passing](docs/screenshots/contract-tests.png)
 
 ## What I'd build next
 
@@ -170,7 +182,7 @@ npm test
 
 ## Project status
 
-The contracts and their 15 tests are complete and passing (`cargo test --workspace`). The frontend is fully built against real Soroban RPC calls and Freighter — it just needs to be pointed at deployed contract IDs. The one step left before the checklist items below are fully live is running `./scripts/deploy.sh` on testnet and dropping the resulting IDs into `frontend/.env`, then filling in the contract addresses, transaction hash, live demo link, and screenshots above.
+The project is fully deployed and running on Stellar testnet. Both Soroban contracts are deployed and connected, the frontend is configured with the live contract IDs, and Freighter transactions work end-to-end. Deals can be created with real testnet assets, funds are held by the escrow contract, and deal state is read directly from Soroban RPC. The contract test suite contains 15 passing tests, and the repository includes a GitHub Actions CI pipeline for automated testing.
 
 ## License
 
