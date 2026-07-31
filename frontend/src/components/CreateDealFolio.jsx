@@ -18,8 +18,8 @@ export default function CreateDealFolio({ wallet, onCreate, busy }) {
       setError('Enter the seller\u2019s Stellar address.');
       return;
     }
-    const amt = Number(amount);
-    if (!amt || amt <= 0) {
+    const amt = amount.trim();
+    if (!amt || !/^\d+(\.\d+)?$/.test(amt)) {
       setError('Enter an amount greater than zero.');
       return;
     }

@@ -9,6 +9,7 @@ import {
   rpc,
 } from '@stellar/stellar-sdk';
 import { config } from './config';
+import { parseTokenAmount } from './amount';
 import { signXdr } from './wallet';
 
 const server = new rpc.Server(config.rpcUrl, { allowHttp: config.rpcUrl.startsWith('http://') });
@@ -36,7 +37,7 @@ async function invoke({ contractId, method, args, sourceAddress }) {
   }
 
   const prepared = rpc.assembleTransaction(tx, simulated).build();
-  const signedXdr = await signXdr(prepared.toXDR(), config.networkPassphrase);
+  const signedXdr = await signXdr(prepared.toXDR(), config.networkPassphrase, sourceAddress);
 
   const signedTx = TransactionBuilder.fromXDR(signedXdr, config.networkPassphrase);
   const sendResult = await server.sendTransaction(signedTx);
@@ -84,11 +85,12 @@ async function readOnly({ contractId, method, args = [], callerAddress }) {
 }
 
 export async function createDeal({ buyer, seller, amount, timeoutLedgers }) {
+  const tokenAmount = parseTokenAmount(amount, config.tokenDecimals);
   const args = [
     new Address(buyer).toScVal(),
     new Address(seller).toScVal(),
     new Address(config.tokenContractId).toScVal(),
-    nativeToScVal(BigInt(amount), { type: 'i128' }),
+    nativeToScVal(tokenAmount, { type: 'i128' }),
     nativeToScVal(timeoutLedgers, { type: 'u32' }),
   ];
   return invoke({ contractId: config.escrowContractId, method: 'create_deal', args, sourceAddress: buyer });

@@ -1,3 +1,6 @@
+import { formatTokenAmount } from '../lib/amount';
+import { config } from '../lib/config';
+
 function shortAddr(addr) {
   if (!addr) return '—';
   return `${addr.slice(0, 4)}…${addr.slice(-4)}`;
@@ -13,7 +16,12 @@ function DealLine({ deal, wallet, onRelease, onRefund, onClaimTimeout, busyId })
   const isBuyer = wallet && deal.buyer === wallet.address;
   const isSeller = wallet && deal.seller === wallet.address;
   const busy = busyId === deal.id;
-  const statusClass = deal.status.toLowerCase();
+  const status =
+    typeof deal.status === 'string'
+      ? deal.status
+      : Object.keys(deal.status ?? {})[0] ?? 'Pending';
+
+  const statusClass = status.toLowerCase();
 
   return (
     <div className="deal-line">
@@ -30,21 +38,21 @@ function DealLine({ deal, wallet, onRelease, onRefund, onClaimTimeout, busyId })
         </span>
       </div>
 
-      <span className="deal-amount">{deal.amount.toLocaleString()}</span>
+      <span className="deal-amount">{formatTokenAmount(deal.amount, config.tokenDecimals)}</span>
 
       <div className="deal-actions">
-        <span className={`stamp ${statusClass}`}>{STAMP_LABEL[deal.status]}</span>
-        {deal.status === 'Pending' && isBuyer && (
+        <span className={`stamp ${statusClass}`}>{STAMP_LABEL[status]}</span>
+        {status === 'Pending' && isBuyer && (
           <button className="small-btn" disabled={busy} onClick={() => onRelease(deal.id)}>
             {busy ? '…' : 'Release'}
           </button>
         )}
-        {deal.status === 'Pending' && isSeller && (
+        {status === 'Pending' && isSeller && (
           <button className="small-btn" disabled={busy} onClick={() => onRefund(deal.id)}>
             {busy ? '…' : 'Refund'}
           </button>
         )}
-        {deal.status === 'Pending' && !isBuyer && !isSeller && (
+        {status === 'Pending' && !isBuyer && !isSeller && (
           <button className="small-btn" disabled={busy} onClick={() => onClaimTimeout(deal.id)}>
             {busy ? '…' : 'Claim timeout'}
           </button>

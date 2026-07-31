@@ -5,6 +5,8 @@ export const config = {
   escrowContractId: import.meta.env.VITE_ESCROW_CONTRACT_ID || '',
   reputationContractId: import.meta.env.VITE_REPUTATION_CONTRACT_ID || '',
   tokenContractId: import.meta.env.VITE_TOKEN_CONTRACT_ID || '',
+  /** Native XLM SAC uses 7 decimals (stroops). Override for custom assets. */
+  tokenDecimals: Number(import.meta.env.VITE_TOKEN_DECIMALS ?? 7),
   pollIntervalMs: Number(import.meta.env.VITE_POLL_INTERVAL_MS || 6000),
 };
 

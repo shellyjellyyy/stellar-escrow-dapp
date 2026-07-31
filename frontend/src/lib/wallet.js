@@ -1,12 +1,11 @@
 import {
   isConnected,
   isAllowed,
-  setAllowed,
   requestAccess,
-  getAddress,
   getNetwork,
   signTransaction,
 } from '@stellar/freighter-api';
+import { config } from './config';
 
 /**
  * Thin wrapper around the Freighter browser extension so the rest of the
@@ -21,21 +20,47 @@ export async function connectWallet() {
     );
   }
 
-  const allowed = await isAllowed();
-  if (!allowed?.isAllowed) {
-    await setAllowed();
-    await requestAccess();
+  // requestAccess() is the canonical site-authorization flow. getAddress() uses
+  // requestPublicKey() and can return an address even when the site is not
+  // connected for signing — which is what triggers Freighter's
+  // "<site> is not currently connected" warning at sign time.
+  const access = await requestAccess();
+  if (access.error) throw new Error(access.error);
+  if (!access.address) {
+    throw new Error('Freighter did not return a wallet address.');
   }
 
-  const { address, error: addrError } = await getAddress();
-  if (addrError) throw new Error(addrError);
-
   const network = await getNetwork();
-  return { address, network: network?.network, networkPassphrase: network?.networkPassphrase };
+  if (network.error) throw new Error(network.error);
+  if (network.networkPassphrase !== config.networkPassphrase) {
+    throw new Error(
+      'Freighter is on the wrong network. Open Freighter and switch to Testnet, then connect again.'
+    );
+  }
+
+  return {
+    address: access.address,
+    network: network.network,
+    networkPassphrase: network.networkPassphrase,
+  };
 }
 
-export async function signXdr(xdr, networkPassphrase) {
-  const result = await signTransaction(xdr, { networkPassphrase });
+/** Ensure the current site is authorized before signing (mirrors signMessage/signAuthEntry). */
+export async function ensureWalletAccess() {
+  const allowed = await isAllowed();
+  if (allowed?.isAllowed) return;
+
+  const access = await requestAccess();
+  if (access.error) throw new Error(access.error);
+}
+
+export async function signXdr(xdr, networkPassphrase, address) {
+  await ensureWalletAccess();
+
+  const result = await signTransaction(xdr, { networkPassphrase, address });
   if (result?.error) throw new Error(result.error);
-  return result.signedTxXdr ?? result.signedXDR;
+  if (!result.signedTxXdr) {
+    throw new Error('Freighter did not return a signed transaction.');
+  }
+  return result.signedTxXdr;
 }

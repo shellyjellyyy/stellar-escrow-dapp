@@ -72,16 +72,30 @@ export default function App() {
     refreshDeals();
     stopWatchRef.current?.();
     stopWatchRef.current = chain.watchEvents({
-      onEvents: (events) => {
-        refreshDeals();
+      onEvents: async (events) => {
+        try {
+          await refreshDeals();
+        } catch (err) {
+          console.error('refreshDeals failed:', err);
+        }
+
         events.forEach((ev) => {
-          const topic = ev.topic?.[0];
-          if (topic?.includes?.('rep_upd')) {
-            setTicks((t) => [{ id: `${ev.id}`, positive: true, label: 'reputation updated' }, ...t].slice(0, 20));
+          const topic = String(ev.topic?.[0] ?? '');
+          if (topic.includes('rep_upd')) {
+            setTicks((t) => [
+              {
+                id: `${ev.id}`,
+                positive: true,
+                label: 'reputation updated',
+              },
+              ...t,
+            ].slice(0, 20));
           }
         });
       },
-      onError: (err) => pushToast('Live feed hiccup', err.message, 'error'),
+      onError: (err) => {
+        console.error('watchEvents error:', err);
+      },
     });
     return () => stopWatchRef.current?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
